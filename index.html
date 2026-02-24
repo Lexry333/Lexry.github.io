@@ -2,102 +2,312 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 核心防护：禁止缓存、禁止嵌入、禁止索引 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>3D Portfolio | 作品集</title>
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta name="robots" content="noindex, nofollow">
+    <title>我的3D作品集</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+        /* 全局样式重置 + 基础防护 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* 禁止所有元素拖拽 */
+            -webkit-user-drag: none;
+            user-drag: none;
+        }
 
+        /* 页面主体：渐变背景 + 禁止触摸呼出菜单 */
         body {
-            /* 更有质感的深色渐变 */
-            background: radial-gradient(circle at center, #1b1b2f 0%, #050505 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px 0;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            overflow-x: hidden;
+            padding: 20px 0;
+            font-family: "Microsoft YaHei", sans-serif;
+            -webkit-touch-callout: none;
+            touch-action: manipulation; /* 禁止移动端触摸默认行为（如长按保存） */
+            overflow: hidden; /* 禁止页面滚动，仅缩放图片 */
         }
 
+        /* 双语提示容器 */
         .tip-container {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
-            opacity: 0.8;
+            z-index: 10;
         }
-
         .tip-text-cn {
-            color: #00d4ff; /* 极客蓝，更有 3D 感 */
-            font-size: 14px;
+            color: #e0e0e0;
+            font-size: 16px;
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            letter-spacing: 1px;
             display: block;
-            margin-bottom: 5px;
-            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+            margin-bottom: 8px;
+            pointer-events: none;
+        }
+        .tip-text-en {
+            color: #b0b0b0;
+            font-size: 14px;
+            padding: 6px 18px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 18px;
+            display: block;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) {
+            .tip-text-cn { font-size: 14px; padding: 6px 16px; }
+            .tip-text-en { font-size: 12px; padding: 4px 14px; }
         }
 
+        /* 图片容器：限制最大宽度，适配响应式 */
         .portfolio-container {
             width: 100%;
-            max-width: 1100px;
-            padding: 0 20px;
+            max-width: 1200px;
+            padding: 0 10px;
+            overflow: hidden; /* 防止放大后溢出页面 */
         }
 
+        /* 图片核心样式：降清 + 高缩放上限 + 防护 */
+        .portfolio-img {
+            /* 强制降清：核心！仅保留细节，无法作为原图使用 */
+            image-rendering: pixelated; /* 低清渲染 */
+            filter: blur(0.8px) contrast(95%); /* 轻微模糊+降对比度，降低截图价值 */
+            max-width: 80%; /* 初始宽度 */
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            transform-origin: center center;
+            transition: transform 0.15s ease; /* 更顺滑的缩放动画 */
+            cursor: zoom-in;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
+            /* 防护：禁止拖拽/选择/触摸呼出菜单 */
+            -webkit-touch-callout: none;
+            pointer-events: auto !important;
+            z-index: 2;
+        }
+
+        /* 图片外层容器：布局 + 防长按保存（移动端） */
         .img-wrapper {
             position: relative;
-            margin-bottom: 50px;
-            text-align: center;
-        }
-
-        .portfolio-img {
             width: 100%;
             height: auto;
-            border-radius: 12px;
-            /* 增加呼吸灯特效的投影 */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,212,255,0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: crosshair;
-            -webkit-user-drag: none;
+            margin: 10px 0;
+            /* 移动端防长按：覆盖透明层，不拦截交互 */
+            -webkit-touch-callout: none;
+            touch-action: none;
         }
 
-        /* 鼠标悬停时轻微放大 */
-        .portfolio-img:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.9), 0 0 30px rgba(0,212,255,0.1);
+        /* 水印层：叠加半透明水印，进一步降低截图价值 */
+        .watermark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none; /* 不拦截交互 */
+            z-index: 3;
         }
-
+        .watermark-text {
+            font-size: 3vw;
+            color: rgba(255, 255, 255, 0.15);
+            transform: rotate(-15deg);
+            letter-spacing: 5px;
+            white-space: nowrap;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
-<body oncontextmenu="return false;">
-
+<!-- 全局防护：禁止右键 + 禁止选择 + 禁止拖拽 -->
+<body 
+    oncontextmenu="return false;" 
+    onselectstart="return false;" 
+    ondragstart="return false;"
+    ontouchstart="return false;"
+>
+    <!-- 双语提示 -->
     <div class="tip-container">
-        <span class="tip-text-cn">🔒 作品受版权保护 | 滚轮或双指可缩放查看细节</span>
+        <span class="tip-text-cn">✨ 鼠标滚轮可放大/缩小图片 | 手机双指捏合可缩放</span>
+        <span class="tip-text-en">✨ Use mouse wheel to zoom in/out | Pinch to zoom on mobile</span>
     </div>
 
+    <!-- 作品集容器 -->
     <div class="portfolio-container">
-        <div class="img-wrapper">< img src="1.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="2.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="3.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="4.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="2025.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="2025-1.jpg" class="portfolio-img"></div>
-        <div class="img-wrapper">< img src="111.jpg" class="portfolio-img"></div>
+        <!-- 图片顺序可调整img-wrapper标签顺序 -->
+        <div class="img-wrapper">
+            <img src="1.jpg" alt="3D作品1" class="portfolio-img" onwheel="zoomImg(event)">
+            <!-- 水印层：替换成你的标识/用户名 -->
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="2.jpg" alt="3D作品2" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="3.jpg" alt="3D作品3" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="4.jpg" alt="3D作品4" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="2025.jpg" alt="3D作品2025" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="2025-1.jpg" alt="3D作品2025-1" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
+        <div class="img-wrapper">
+            <img src="111.jpg" alt="3D作品111" class="portfolio-img" onwheel="zoomImg(event)">
+            <div class="watermark">
+                <div class="watermark-text">YOUR_NAME 3D PORTFOLIO</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 1. 禁止开发者工具 (F12, Ctrl+Shift+I等)
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
-                return false;
-            }
-        };
+        // 终极防护：禁止所有可能的操作
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 禁止所有快捷键（F12/Ctrl+I/Ctrl+U/Ctrl+S/Ctrl+C/V等）
+            document.addEventListener('keydown', function(e) {
+                const forbiddenKeys = [
+                    'F12', 'I', 'U', 'S', 'C', 'V', 'X', 'A', 'P', 
+                    'PrintScreen' // 禁止打印屏幕键（部分浏览器生效）
+                ];
+                if (
+                    e.key === 'F12' ||
+                    (e.ctrlKey && e.shiftKey && forbiddenKeys.includes(e.key)) ||
+                    (e.ctrlKey && forbiddenKeys.includes(e.key)) ||
+                    (e.metaKey && forbiddenKeys.includes(e.key)) || // 适配Mac的Command键
+                    e.key === 'PrintScreen'
+                ) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            });
 
-        // 2. 简单的缩放逻辑补全
-        let scale = 1;
-        document.querySelectorAll('.portfolio-img').forEach(img => {
-            img.onwheel = function(e) {
+            // 2. 禁止复制/剪切/粘贴/撤销
+            ['copy', 'cut', 'paste', 'undo'].forEach(event => {
+                document.addEventListener(event, e => e.preventDefault());
+            });
+
+            // 3. 禁止图片加载完成后被修改（防开发者工具篡改）
+            document.querySelectorAll('.portfolio-img').forEach(img => {
+                img.addEventListener('load', function() {
+                    // 锁定图片样式，防止被开发者工具修改
+                    this.style.filter = 'blur(0.8px) contrast(95%)';
+                    this.style.imageRendering = 'pixelated';
+                    // 定时检测样式，防止被篡改
+                    setInterval(() => {
+                        if (this.style.filter !== 'blur(0.8px) contrast(95%)') {
+                            this.style.filter = 'blur(0.8px) contrast(95%)';
+                        }
+                        if (this.style.imageRendering !== 'pixelated') {
+                            this.style.imageRendering = 'pixelated';
+                        }
+                    }, 100);
+                });
+            });
+
+            // 4. 移动端防长按/触摸保存
+            document.addEventListener('touchstart', function(e) {
                 e.preventDefault();
-                scale += e.deltaY * -0.001;
-                scale = Math.min(Math.max(.5, scale), 3);
-                img.style.transform = `scale(${scale})`;
-            };
+                e.stopPropagation();
+            }, { passive: false });
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+        });
+
+        // 缩放功能：提升最大缩放尺寸（最大3倍，最小0.5倍）
+        function zoomImg(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const img = event.target;
+            let scale = parseFloat(img.dataset.scale || 1);
+            // 缩放步长调大，放大更明显
+            scale += event.deltaY > 0 ? -0.15 : 0.15;
+            // 最大缩放3倍（可调整为4/5倍），最小0.5倍
+            scale = Math.max(0.5, Math.min(3, scale));
+            img.dataset.scale = scale;
+            img.style.transform = `scale(${scale})`;
+            // 同步锁定水印缩放，防止水印错位
+            img.parentElement.querySelector('.watermark').style.transform = `scale(${scale})`;
+        }
+
+        // 移动端触摸缩放：适配高缩放上限
+        let initialScale = 1;
+        let initialDistance = 0;
+        let currentImg = null;
+        document.querySelectorAll('.portfolio-img').forEach(img => {
+            // 仅允许双指触摸事件（单指禁止，防长按）
+            img.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+                if (e.touches.length === 2) {
+                    currentImg = e.target;
+                    initialScale = parseFloat(currentImg.dataset.scale || 1);
+                    const x1 = e.touches[0].clientX;
+                    const y1 = e.touches[0].clientY;
+                    const x2 = e.touches[1].clientX;
+                    const y2 = e.touches[1].clientY;
+                    initialDistance = Math.hypot(x2 - x1, y2 - y1);
+                } else {
+                    e.preventDefault(); // 单指触摸禁止
+                }
+            }, { passive: false });
+
+            img.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (e.touches.length === 2 && currentImg) {
+                    const x1 = e.touches[0].clientX;
+                    const y1 = e.touches[0].clientY;
+                    const x2 = e.touches[1].clientX;
+                    const y2 = e.touches[1].clientY;
+                    const currentDistance = Math.hypot(x2 - x1, y2 - y1);
+                    const scale = initialScale * (currentDistance / initialDistance);
+                    const clampedScale = Math.max(0.5, Math.min(3, scale));
+                    currentImg.dataset.scale = clampedScale;
+                    currentImg.style.transform = `scale(${clampedScale})`;
+                    currentImg.parentElement.querySelector('.watermark').style.transform = `scale(${clampedScale})`;
+                }
+            }, { passive: false });
+
+            img.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                currentImg = null;
+            });
         });
     </script>
 </body>
