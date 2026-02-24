@@ -47,15 +47,14 @@
             touch-action: none; /* 禁用浏览器默认触摸行为 */
         }
 
-        /* 图片样式：仅轻微降清，保留细节 */
+        /* 图片样式：初始尺寸调大（从70%→90%），仅极轻微模糊 */
         .portfolio-img {
-            width: 70%;
+            width: 90%; /* 核心调整：初始宽度从70%改为90%，不占满屏幕且更大 */
             height: auto;
             display: block;
             cursor: grab;
             transform-origin: center center;
             transition: transform 0.08s linear;
-            /* 核心调整：仅极轻微模糊，去掉像素化渲染 */
             filter: blur(0.1px); 
             pointer-events: auto;
             position: relative;
