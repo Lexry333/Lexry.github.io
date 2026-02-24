@@ -1,16 +1,54 @@
 <!DOCTYPE html>
-<html>
-<body style="background-color:black; text-align:center;">
+<!-- 这是HTML5标准声明头，确保GitHub Pages识别为网页而非文本 -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 视口设置，确保在手机等移动设备上响应式显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的3D作品集</title>
+    <style>
+        /* 全局样式重置，清除默认边距和内边距 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <h1 style="color:white;">My 3D Works</h1>
+        /* 页面主体样式：全黑背景，最小高度占满屏幕 */
+        body {
+            background-color: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 水平居中 */
+        }
 
-    < img src="1.jpg" style="width:90%; margin:10px;">
-    < img src="2.jpg" style="width:90%; margin:10px;">
-    < img src="3.jpg" style="width:90%; margin:10px;">
-    < img src="4.jpg" style="width:90%; margin:10px;">
-    < img src="2025.jpg" style="width:90%; margin:10px;">
-    < img src="2025-1.jpg" style="width:90%; margin:10px;">
-    < img src="111.jpg" style="width:90%; margin:10px;">
+        /* 图片容器样式：宽度100%，确保图片垂直排列 */
+        .portfolio-container {
+            width: 100%;
+        }
 
+        /* 图片样式：响应式占满容器宽度，居中显示，添加少量间距 */
+        .portfolio-img {
+            width: 100%;
+            height: auto; /* 保持图片比例 */
+            display: block; /* 消除图片底部默认空隙 */
+            margin: 0 auto; /* 水平居中 */
+            padding: 8px 0; /* 图片之间的垂直间距 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 作品集图片容器 -->
+    <div class="portfolio-container">
+        <!-- 图片顺序可通过调整以下img标签的顺序来修改 -->
+        <img src="1.jpg" alt="3D作品1" class="portfolio-img">
+        <img src="2.jpg" alt="3D作品2" class="portfolio-img">
+        <img src="3.jpg" alt="3D作品3" class="portfolio-img">
+        <img src="4.jpg" alt="3D作品4" class="portfolio-img">
+        <img src="2025.jpg" alt="3D作品2025" class="portfolio-img">
+        <img src="2025-1.jpg" alt="3D作品2025-1" class="portfolio-img">
+        <img src="111.jpg" alt="3D作品111" class="portfolio-img">
+    </div>
 </body>
 </html>
