@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- HTML5标准声明头，确保GitHub Pages识别为网页 -->
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -13,36 +12,60 @@
             box-sizing: border-box;
         }
 
-        /* 页面主体：全黑背景，水平居中，添加顶部/底部间距 */
+        /* 页面主体：渐变背景+提示文字样式，水平居中 */
         body {
-            background-color: #000;
+            /* 深色蓝紫渐变背景（规律且高级，不刺眼），可自行调整色值 */
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 0; /* 上下留白，避免图片贴边 */
+            padding: 20px 0;
+            font-family: "Microsoft YaHei", sans-serif; /* 适配中文显示 */
+        }
+
+        /* 提示文字样式：固定在顶部，半透明不遮挡内容 */
+        .tip-text {
+            color: #e0e0e0; /* 浅灰色文字，柔和不刺眼 */
+            font-size: 16px;
+            margin-bottom: 20px;
+            padding: 8px 20px;
+            background: rgba(0, 0, 0, 0.3); /* 半透明黑底，增强可读性 */
+            border-radius: 20px; /* 圆角更美观 */
+            letter-spacing: 1px; /* 字间距更舒适 */
+            /* 适配移动端字体大小 */
+            @media (max-width: 768px) {
+                font-size: 14px;
+                padding: 6px 16px;
+            }
         }
 
         /* 图片容器：限制最大宽度，确保初始尺寸不超屏 */
         .portfolio-container {
             width: 100%;
-            max-width: 1200px; /* 电脑端最大宽度，可自行调整 */
-            padding: 0 10px; /* 左右小间距，避免贴边 */
+            max-width: 1200px; /* 电脑端最大宽度 */
+            padding: 0 10px;
         }
 
         /* 图片基础样式：初始宽度80%，居中，保持比例，可缩放 */
         .portfolio-img {
-            width: 80%; /* 初始宽度设为屏幕/容器的80%，不再占满 */
+            width: 80%;
             height: auto;
             display: block;
-            margin: 10px auto; /* 垂直间距+水平居中 */
+            margin: 10px auto;
             transform-origin: center center; /* 缩放以图片中心为原点 */
-            transition: transform 0.1s ease; /* 缩放动画，更顺滑 */
+            transition: transform 0.1s ease; /* 缩放动画 */
             cursor: zoom-in; /* 鼠标悬浮提示可缩放 */
+            /* 轻微阴影，增强图片层次感 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            border-radius: 4px; /* 图片轻微圆角，更精致 */
         }
     </style>
 </head>
 <body>
+    <!-- 滚轮提示文字 -->
+    <div class="tip-text">✨ 鼠标滚轮可放大/缩小图片 | 手机双指捏合可缩放</div>
+
     <!-- 作品集图片容器 -->
     <div class="portfolio-container">
         <!-- 图片顺序可直接调整img标签顺序 -->
@@ -66,10 +89,9 @@
             let scale = parseFloat(img.dataset.scale || 1);
             
             // 滚轮向上（放大）：增加缩放比例；向下（缩小）：减少缩放比例
-            // 0.1是缩放步长，可调整（比如0.05更细腻，0.2更快）
             scale += event.deltaY > 0 ? -0.1 : 0.1;
             
-            // 限制缩放范围，避免缩太小/太大（可自行调整）
+            // 限制缩放范围，避免缩太小/太大
             scale = Math.max(0.5, Math.min(2, scale)); // 最小0.5倍，最大2倍
             
             // 保存当前缩放比例到图片的data属性
@@ -77,6 +99,44 @@
             // 应用缩放变换
             img.style.transform = `scale(${scale})`;
         }
+
+        // 移动端触摸缩放支持（额外优化，适配手机）
+        let initialScale = 1;
+        let currentImg = null;
+        document.querySelectorAll('.portfolio-img').forEach(img => {
+            img.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 2) {
+                    currentImg = e.target;
+                    initialScale = parseFloat(currentImg.dataset.scale || 1);
+                    // 计算初始两指距离
+                    const x1 = e.touches[0].clientX;
+                    const y1 = e.touches[0].clientY;
+                    const x2 = e.touches[1].clientX;
+                    const y2 = e.touches[1].clientY;
+                    initialDistance = Math.hypot(x2 - x1, y2 - y1);
+                }
+            });
+            img.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (e.touches.length === 2 && currentImg) {
+                    // 计算当前两指距离
+                    const x1 = e.touches[0].clientX;
+                    const y1 = e.touches[0].clientY;
+                    const x2 = e.touches[1].clientX;
+                    const y2 = e.touches[1].clientY;
+                    const currentDistance = Math.hypot(x2 - x1, y2 - y1);
+                    // 计算缩放比例
+                    const scale = initialScale * (currentDistance / initialDistance);
+                    // 限制缩放范围
+                    const clampedScale = Math.max(0.5, Math.min(2, scale));
+                    currentImg.dataset.scale = clampedScale;
+                    currentImg.style.transform = `scale(${clampedScale})`;
+                }
+            });
+            img.addEventListener('touchend', () => {
+                currentImg = null;
+            });
+        });
     </script>
 </body>
 </html>
