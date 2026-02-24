@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 禁止网页内容被缓存（可选，增强防护） -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>我的3D作品集</title>
     <style>
         /* 全局样式重置 */
@@ -10,30 +14,38 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            /* 禁止文本选择，配合图片防护 */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* 页面主体：渐变背景+提示文字样式，水平居中 */
         body {
-            /* 深色蓝紫渐变背景（规律且高级，不刺眼），可自行调整色值 */
+            /* 高级深色蓝紫渐变背景，突出作品 */
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 0;
-            font-family: "Microsoft YaHei", sans-serif; /* 适配中文显示 */
+            font-family: "Microsoft YaHei", sans-serif;
+            /* 禁止右键菜单（第一层防护） */
+            -webkit-touch-callout: none;
         }
 
         /* 提示文字样式：固定在顶部，半透明不遮挡内容 */
         .tip-text {
-            color: #e0e0e0; /* 浅灰色文字，柔和不刺眼 */
+            color: #e0e0e0;
             font-size: 16px;
             margin-bottom: 20px;
             padding: 8px 20px;
-            background: rgba(0, 0, 0, 0.3); /* 半透明黑底，增强可读性 */
-            border-radius: 20px; /* 圆角更美观 */
-            letter-spacing: 1px; /* 字间距更舒适 */
-            /* 适配移动端字体大小 */
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            letter-spacing: 1px;
+            /* 禁止提示文字被选择 */
+            pointer-events: none;
             @media (max-width: 768px) {
                 font-size: 14px;
                 padding: 6px 16px;
@@ -43,7 +55,7 @@
         /* 图片容器：限制最大宽度，确保初始尺寸不超屏 */
         .portfolio-container {
             width: 100%;
-            max-width: 1200px; /* 电脑端最大宽度 */
+            max-width: 1200px;
             padding: 0 10px;
         }
 
@@ -53,62 +65,103 @@
             height: auto;
             display: block;
             margin: 10px auto;
-            transform-origin: center center; /* 缩放以图片中心为原点 */
-            transition: transform 0.1s ease; /* 缩放动画 */
-            cursor: zoom-in; /* 鼠标悬浮提示可缩放 */
-            /* 轻微阴影，增强图片层次感 */
+            transform-origin: center center;
+            transition: transform 0.1s ease;
+            cursor: zoom-in;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-            border-radius: 4px; /* 图片轻微圆角，更精致 */
+            border-radius: 4px;
+            /* 核心：禁止图片被拖拽/选择（第二层防护） */
+            pointer-events: auto;
+            -webkit-user-drag: none;
+            user-drag: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* 图片覆盖层：防止右键直接保存（第三层防护） */
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: auto;
+        }
+        .img-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            /* 透明覆盖层，不影响视觉但拦截右键 */
+            background: transparent;
+            pointer-events: auto;
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- 全局禁止右键菜单（核心防护） -->
     <!-- 滚轮提示文字 -->
     <div class="tip-text">✨ 鼠标滚轮可放大/缩小图片 | 手机双指捏合可缩放</div>
 
     <!-- 作品集图片容器 -->
     <div class="portfolio-container">
-        <!-- 图片顺序可直接调整img标签顺序 -->
-        <img src="1.jpg" alt="3D作品1" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="2.jpg" alt="3D作品2" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="3.jpg" alt="3D作品3" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="4.jpg" alt="3D作品4" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="2025.jpg" alt="3D作品2025" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="2025-1.jpg" alt="3D作品2025-1" class="portfolio-img" onwheel="zoomImg(event)">
-        <img src="111.jpg" alt="3D作品111" class="portfolio-img" onwheel="zoomImg(event)">
+        <!-- 图片外层包裹div，添加防护覆盖层 -->
+        <!-- 图片顺序可直接调整img-wrapper标签顺序 -->
+        <div class="img-wrapper">
+            <img src="1.jpg" alt="3D作品1" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="2.jpg" alt="3D作品2" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="3.jpg" alt="3D作品3" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="4.jpg" alt="3D作品4" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="2025.jpg" alt="3D作品2025" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="2025-1.jpg" alt="3D作品2025-1" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
+        <div class="img-wrapper">
+            <img src="111.jpg" alt="3D作品111" class="portfolio-img" onwheel="zoomImg(event)">
+        </div>
     </div>
 
     <script>
+        // 禁止F12审查元素（补充防护，可选）
+        document.addEventListener('keydown', function(e) {
+            // 禁止F12、Ctrl+Shift+I、Ctrl+U、Ctrl+S
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+                (e.ctrlKey && e.key === 'u') ||
+                (e.ctrlKey && e.key === 's')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        });
+
         // 鼠标滚轮缩放图片的核心函数
         function zoomImg(event) {
-            // 阻止页面整体滚动，只缩放图片
             event.preventDefault();
-            
             const img = event.target;
-            // 获取当前缩放比例（默认1，即初始80%宽度）
             let scale = parseFloat(img.dataset.scale || 1);
-            
-            // 滚轮向上（放大）：增加缩放比例；向下（缩小）：减少缩放比例
             scale += event.deltaY > 0 ? -0.1 : 0.1;
-            
-            // 限制缩放范围，避免缩太小/太大
-            scale = Math.max(0.5, Math.min(2, scale)); // 最小0.5倍，最大2倍
-            
-            // 保存当前缩放比例到图片的data属性
+            scale = Math.max(0.5, Math.min(2, scale));
             img.dataset.scale = scale;
-            // 应用缩放变换
             img.style.transform = `scale(${scale})`;
         }
 
-        // 移动端触摸缩放支持（额外优化，适配手机）
+        // 移动端触摸缩放支持
         let initialScale = 1;
+        let initialDistance = 0;
         let currentImg = null;
         document.querySelectorAll('.portfolio-img').forEach(img => {
             img.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
                     currentImg = e.target;
                     initialScale = parseFloat(currentImg.dataset.scale || 1);
-                    // 计算初始两指距离
                     const x1 = e.touches[0].clientX;
                     const y1 = e.touches[0].clientY;
                     const x2 = e.touches[1].clientX;
@@ -119,15 +172,12 @@
             img.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if (e.touches.length === 2 && currentImg) {
-                    // 计算当前两指距离
                     const x1 = e.touches[0].clientX;
                     const y1 = e.touches[0].clientY;
                     const x2 = e.touches[1].clientX;
                     const y2 = e.touches[1].clientY;
                     const currentDistance = Math.hypot(x2 - x1, y2 - y1);
-                    // 计算缩放比例
                     const scale = initialScale * (currentDistance / initialDistance);
-                    // 限制缩放范围
                     const clampedScale = Math.max(0.5, Math.min(2, scale));
                     currentImg.dataset.scale = clampedScale;
                     currentImg.style.transform = `scale(${clampedScale})`;
@@ -135,6 +185,16 @@
             });
             img.addEventListener('touchend', () => {
                 currentImg = null;
+            });
+        });
+
+        // 额外防护：禁止图片复制/粘贴
+        document.querySelectorAll('.portfolio-img').forEach(img => {
+            img.addEventListener('copy', (e) => {
+                e.preventDefault();
+            });
+            img.addEventListener('cut', (e) => {
+                e.preventDefault();
             });
         });
     </script>
