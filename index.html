@@ -1,13 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <title>我的作品集</title>
     <style>
-        body { background: #000; margin: 0; padding: 20px; text-align: center; }
-        img { width: 90%; max-width: 800px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
+        /* 这里是背景颜色，我设成了深灰色，这样看3D作品比较专业 */
+        body { 
+            background-color: #1a1a1a; 
+            margin: 0; 
+            padding: 40px 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        /* 这里控制图片大小，统一宽度，自动居中 */
+        img { 
+            width: 90%; 
+            max-width: 1000px; 
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* 给图片加一点阴影，更有质感 */
+        }
     </style>
 </head>
 <body>
+
     < img src="1.jpg">
     < img src="2.jpg">
     < img src="3.jpg">
@@ -15,5 +31,6 @@
     < img src="2025.jpg">
     < img src="2025-1.jpg">
     < img src="111.jpg">
+
 </body>
 </html>
