@@ -3,12 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <!-- 核心优化：禁止预加载非必要资源，加速首屏 -->
-    <meta http-equiv="Cache-Control" content="public, max-age=31536000">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>我的3D作品集</title>
     <style>
-        /* 核心优化：CSS合并精简，减少渲染层级 */
         * {
             margin: 0;
             padding: 0;
@@ -18,370 +14,206 @@
         }
 
         body {
-            background: #000;
+            background: linear-gradient(135deg, #0f0f18, #1a1a2e, #16213e);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 0;
-            font-family: 'Courier New', monospace, sans-serif;
+            font-family: sans-serif;
             overflow-x: hidden;
-            position: relative;
-            /* 优化：禁止body滚动，减少重绘 */
-            overflow-y: auto;
-            touch-action: manipulation;
         }
 
-        /* 像素雨画布：性能优化 - 硬件加速 */
-        #rain-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            opacity: 0.7;
-            pointer-events: none;
-            /* 核心优化：开启硬件加速，减少卡顿 */
-            transform: translateZ(0);
-            will-change: transform;
-        }
-
-        /* 提示语：精简样式，提升渲染速度 */
+        /* 提示语 */
         .tip {
-            color: #00ff41;
+            color: #fff;
             font-size: 14px;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
             padding: 6px 14px;
             border-radius: 20px;
             margin-bottom: 6px;
             pointer-events: none;
-            z-index: 10;
-            /* 优化：固定提示语，减少重排 */
-            position: sticky;
-            top: 10px;
         }
 
-        /* 图片容器：优化布局，减少嵌套层级 */
+        /* 图片容器（支持拖拽） */
         .img-box {
             position: relative;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1100px; /* 容器宽度调大，让图片初始显示更大 */
             margin: 10px auto;
             display: flex;
             justify-content: center;
             overflow: hidden;
-            touch-action: none;
-            z-index: 1;
-            /* 优化：添加硬件加速 */
-            transform: translateZ(0);
+            touch-action: none; /* 禁用浏览器默认触摸行为 */
         }
 
-        /* 图片样式：保留所有功能，优化渲染 */
+        /* 图片样式：初始尺寸调至98%（接近满屏但不溢出） */
         .portfolio-img {
-            width: 98%;
+            width: 98%; /* 核心调整：初始宽度调至98%，更大且不占满屏幕 */
             height: auto;
             display: block;
             cursor: grab;
             transform-origin: center center;
-            /* 优化：缩短过渡时间，提升响应速度 */
-            transition: transform 0.05s linear;
-            filter: blur(0.1px);
+            transition: transform 0.08s linear;
+            filter: blur(0.1px); 
             pointer-events: auto;
             position: relative;
-            z-index: 2;
-            border: 1px solid #00ff41;
-            /* 优化：图片懒加载+预加载提示 */
-            object-fit: contain;
+            z-index: 1;
         }
 
         .portfolio-img:active {
-            cursor: grabbing;
-        }
-
-        /* 优化：加载中样式 */
-        .img-loading {
-            background: rgba(0, 0, 0, 0.3);
-            min-height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #00ff41;
+            cursor: grabbing; /* 按住时的光标样式 */
         }
     </style>
 </head>
 
 <body oncontextmenu="return false">
-    <!-- 提示语 -->
-    <div class="tip">✨ 鼠标滚轮放大缩小 · 左键拖拽查看细节</div>
-    <div class="tip">Use mouse wheel to zoom · Drag to view details</div>
 
-    <!-- 像素雨画布 -->
-    <canvas id="rain-canvas"></canvas>
+<div class="tip">✨ 鼠标滚轮放大缩小 · 左键拖拽查看细节</div>
+<div class="tip">Use mouse wheel to zoom · Drag to view details</div>
 
-    <!-- 图片容器（反转后的顺序，添加懒加载） -->
-    <div class="img-box">
-        <img src="111.jpg" alt="3D作品111" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="2025-1.jpg" alt="3D作品2025-1" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="2025.jpg" alt="3D作品2025" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="4.jpg" alt="3D作品4" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="3.jpg" alt="3D作品3" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="2.jpg" alt="3D作品2" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
-    <div class="img-box">
-        <img src="1.jpg" alt="3D作品1" class="portfolio-img" loading="lazy" onload="this.classList.remove('img-loading')" class="img-loading">
-    </div>
+<!-- 图片顺序完全反转：111.jpg → 2025-1.jpg → 2025.jpg → 4.jpg → 3.jpg → 2.jpg → 1.jpg -->
+<div class="img-box"><img src="111.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="2025-1.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="2025.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="4.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="3.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="2.jpg" class="portfolio-img"></div>
+<div class="img-box"><img src="1.jpg" class="portfolio-img"></div>
 
-    <script>
-        // ====================== 性能优化：全局变量提前声明，减少重复创建 ======================
-        let canvas, ctx, chars, fontSize, columns, drops, rafId;
-        const imgElements = document.querySelectorAll('.portfolio-img');
-        let mouse = { x: null, y: null };
+<script>
+// 初始化每张图片的参数
+document.querySelectorAll('.portfolio-img').forEach(img => {
+  // 初始化缩放、位移参数
+  img.dataset.scale = 1;
+  img.dataset.x = 0;
+  img.dataset.y = 0;
 
-        // ====================== 像素雨背景（极致性能优化） ======================
-        function initRainCanvas() {
-            canvas = document.getElementById('rain-canvas');
-            ctx = canvas.getContext('2d');
-            
-            // 优化：只在窗口加载完成后初始化，避免资源抢占
-            resizeCanvas();
-            chars = '01'; // 精简字符集，减少计算量
-            fontSize = 16;
-            columns = Math.floor(canvas.width / fontSize);
-            drops = Array(columns).fill(Math.random() * -100);
+  // --------------------------
+  // 1. 电脑端滚轮缩放功能
+  // --------------------------
+  img.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    let scale = parseFloat(img.dataset.scale);
+    // 调整缩放步长，放大缩小更顺手
+    scale += e.deltaY < 0 ? 0.2 : -0.2;
+    // 限制缩放范围：最小0.5倍，最大6倍
+    scale = Math.max(0.5, Math.min(6, scale));
+    img.dataset.scale = scale;
+    updateImgTransform(img);
+  }, { passive: false });
 
-            // 优化：使用requestAnimationFrame替代setInterval，减少卡顿
-            animateRain();
-        }
+  // --------------------------
+  // 2. 电脑端鼠标拖拽功能（修复失效问题）
+  // --------------------------
+  let isDragging = false;
+  let startX = 0, startY = 0;
 
-        // 适配窗口：防抖处理，避免频繁触发
-        function resizeCanvas() {
-            if (canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                columns = Math.floor(canvas.width / fontSize);
-                // 优化：只补充缺失的雨滴，不重新创建数组
-                if (drops.length < columns) {
-                    drops = [...drops, ...Array(columns - drops.length).fill(Math.random() * -100)];
-                } else if (drops.length > columns) {
-                    drops = drops.slice(0, columns);
-                }
-            }
-        }
-        // 防抖函数：50ms内只执行一次
-        const debounceResize = debounce(resizeCanvas, 50);
-        window.addEventListener('resize', debounceResize);
+  // 鼠标按下
+  img.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    // 记录按下时的鼠标位置
+    startX = e.clientX - parseFloat(img.dataset.x);
+    startY = e.clientY - parseFloat(img.dataset.y);
+    img.style.cursor = "grabbing";
+  });
 
-        // 绘制像素雨：精简逻辑，减少计算
-        function drawRain() {
-            // 优化：降低背景透明度，减少重绘成本
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#00ff41';
-            ctx.font = `${fontSize}px 'Courier New', monospace`;
-            
-            for (let i = 0; i < drops.length; i++) {
-                // 优化：固定字符，减少随机计算
-                const text = chars[i % chars.length];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                
-                // 优化：降低重置概率，减少计算
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.985) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
+  // 鼠标移动（绑定到document，避免鼠标移出图片失效）
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    // 计算新的位移
+    const newX = e.clientX - startX;
+    const newY = e.clientY - startY;
+    img.dataset.x = newX;
+    img.dataset.y = newY;
+    updateImgTransform(img);
+  });
 
-        // 动画循环：使用RAF，浏览器自动优化帧率
-        function animateRain() {
-            drawRain();
-            rafId = requestAnimationFrame(animateRain);
-        }
+  // 鼠标松开
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    img.style.cursor = "grab";
+  });
 
-        // ====================== 核心功能：图片缩放+拖拽（修复所有逻辑漏洞） ======================
-        function initImgFunctions() {
-            imgElements.forEach(img => {
-                // 初始化参数：避免NaN，添加默认值
-                img.dataset.scale = img.dataset.scale || 1;
-                img.dataset.x = img.dataset.x || 0;
-                img.dataset.y = img.dataset.y || 0;
+  // --------------------------
+  // 3. 移动端触摸功能（缩放+拖拽）
+  // --------------------------
+  let touchStart = {};
+  let initialScale = 1;
 
-                // 1. 滚轮缩放：修复步长溢出，添加防抖
-                img.addEventListener('wheel', debounce((e) => {
-                    e.preventDefault();
-                    let scale = parseFloat(img.dataset.scale);
-                    scale += e.deltaY < 0 ? 0.2 : -0.2;
-                    // 优化：限制缩放范围，避免极端值
-                    scale = Math.max(0.5, Math.min(6, scale));
-                    img.dataset.scale = scale;
-                    updateImgTransform(img);
-                }, 10), { passive: false });
+  // 触摸开始
+  img.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touches = e.touches;
+    
+    // 单指触摸：初始化拖拽
+    if (touches.length === 1) {
+      touchStart.x = touches[0].clientX - parseFloat(img.dataset.x);
+      touchStart.y = touches[0].clientY - parseFloat(img.dataset.y);
+    }
+    // 双指触摸：初始化缩放
+    else if (touches.length === 2) {
+      initialScale = parseFloat(img.dataset.scale);
+      // 计算双指初始距离
+      touchStart.distance = getTouchDistance(touches[0], touches[1]);
+    }
+  }, { passive: false });
 
-                // 2. 鼠标拖拽：修复坐标计算错误，添加边界检测
-                let isDragging = false;
-                let startX = 0, startY = 0;
+  // 触摸移动
+  img.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touches = e.touches;
+    
+    // 单指移动：拖拽图片
+    if (touches.length === 1) {
+      const newX = touches[0].clientX - touchStart.x;
+      const newY = touches[0].clientY - touchStart.y;
+      img.dataset.x = newX;
+      img.dataset.y = newY;
+      updateImgTransform(img);
+    }
+    // 双指移动：缩放图片
+    else if (touches.length === 2) {
+      const currentDistance = getTouchDistance(touches[0], touches[1]);
+      const scale = initialScale * (currentDistance / touchStart.distance);
+      // 限制缩放范围
+      img.dataset.scale = Math.max(0.5, Math.min(6, scale));
+      updateImgTransform(img);
+    }
+  }, { passive: false });
 
-                img.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    isDragging = true;
-                    // 修复：初始坐标计算错误（原逻辑会导致拖拽偏移）
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    img.style.cursor = "grabbing";
-                });
+  // --------------------------
+  // 工具函数：更新图片变换样式
+  // --------------------------
+  function updateImgTransform(img) {
+    const x = img.dataset.x;
+    const y = img.dataset.y;
+    const scale = img.dataset.scale;
+    img.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+  }
 
-                document.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    // 修复：位移计算逻辑（原逻辑会累积偏移）
-                    const dx = e.clientX - startX;
-                    const dy = e.clientY - startY;
-                    const newX = parseFloat(img.dataset.x) + dx;
-                    const newY = parseFloat(img.dataset.y) + dy;
-                    
-                    // 优化：边界检测，避免图片拖出可视区过多
-                    const maxX = (img.offsetWidth * parseFloat(img.dataset.scale)) / 2;
-                    const maxY = (img.offsetHeight * parseFloat(img.dataset.scale)) / 2;
-                    img.dataset.x = Math.max(-maxX, Math.min(maxX, newX));
-                    img.dataset.y = Math.max(-maxY, Math.min(maxY, newY));
-                    
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    updateImgTransform(img);
-                });
+  // --------------------------
+  // 工具函数：计算双指距离
+  // --------------------------
+  function getTouchDistance(touch1, touch2) {
+    const dx = touch2.clientX - touch1.clientX;
+    const dy = touch2.clientY - touch1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+});
 
-                document.addEventListener('mouseup', () => {
-                    isDragging = false;
-                    img.style.cursor = "grab";
-                });
+// --------------------------
+// 额外防护：禁止快捷键扒图
+// --------------------------
+document.addEventListener('keydown', (e) => {
+  // 禁止F12、Ctrl+U（查看源代码）、Ctrl+S（保存网页）
+  if (e.key === "F12" || (e.ctrlKey && e.key === "u") || (e.ctrlKey && e.key === "s")) {
+    e.preventDefault();
+    return false;
+  }
+});
+</script>
 
-                // 3. 移动端触摸：修复双指缩放与单指拖拽冲突
-                let touchStart = {};
-                let initialScale = 1;
-                let isTouching = false;
-
-                img.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    isTouching = true;
-                    const touches = e.touches;
-                    
-                    if (touches.length === 1) {
-                        // 修复：单指拖拽初始坐标错误
-                        touchStart.x = touches[0].clientX;
-                        touchStart.y = touches[0].clientY;
-                        mouse.x = touches[0].clientX;
-                        mouse.y = touches[0].clientY;
-                    } else if (touches.length === 2) {
-                        // 修复：双指缩放初始距离计算错误
-                        initialScale = parseFloat(img.dataset.scale);
-                        touchStart.distance = getTouchDistance(touches[0], touches[1]);
-                    }
-                }, { passive: false });
-
-                img.addEventListener('touchmove', (e) => {
-                    if (!isTouching) return;
-                    e.preventDefault();
-                    const touches = e.touches;
-                    
-                    if (touches.length === 1) {
-                        // 修复：单指拖拽位移计算错误
-                        const dx = touches[0].clientX - touchStart.x;
-                        const dy = touches[0].clientY - touchStart.y;
-                        const newX = parseFloat(img.dataset.x) + dx;
-                        const newY = parseFloat(img.dataset.y) + dy;
-                        
-                        // 边界检测
-                        const maxX = (img.offsetWidth * parseFloat(img.dataset.scale)) / 2;
-                        const maxY = (img.offsetHeight * parseFloat(img.dataset.scale)) / 2;
-                        img.dataset.x = Math.max(-maxX, Math.min(maxX, newX));
-                        img.dataset.y = Math.max(-maxY, Math.min(maxY, newY));
-                        
-                        touchStart.x = touches[0].clientX;
-                        touchStart.y = touches[0].clientY;
-                        updateImgTransform(img);
-                    } else if (touches.length === 2) {
-                        // 修复：双指缩放比例计算错误
-                        const currentDistance = getTouchDistance(touches[0], touches[1]);
-                        const scale = initialScale * (currentDistance / touchStart.distance);
-                        img.dataset.scale = Math.max(0.5, Math.min(6, scale));
-                        updateImgTransform(img);
-                    }
-                }, { passive: false });
-
-                img.addEventListener('touchend', () => {
-                    isTouching = false;
-                });
-            });
-        }
-
-        // ====================== 工具函数：修复+优化 ======================
-        // 防抖函数：减少高频事件触发（滚轮、窗口缩放）
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        // 计算双指距离：添加容错，避免除以0
-        function getTouchDistance(touch1, touch2) {
-            if (!touch1 || !touch2) return 1;
-            const dx = touch2.clientX - touch1.clientX;
-            const dy = touch2.clientY - touch1.clientY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            // 优化：避免距离为0导致缩放异常
-            return distance || 1;
-        }
-
-        // 更新图片变换：精简逻辑，减少DOM操作
-        function updateImgTransform(img) {
-            const x = parseFloat(img.dataset.x) || 0;
-            const y = parseFloat(img.dataset.y) || 0;
-            const scale = parseFloat(img.dataset.scale) || 1;
-            // 优化：使用cssText，减少重绘次数
-            img.style.cssText += `transform: translate(${x}px, ${y}px) scale(${scale});`;
-        }
-
-        // ====================== 防护功能：精简+优化 ======================
-        function initProtection() {
-            // 禁止快捷键：精简逻辑，只保留核心防护
-            document.addEventListener('keydown', (e) => {
-                const forbiddenKeys = ['F12', 'u', 's', 'p'];
-                if (e.key === 'F12' || (e.ctrlKey && forbiddenKeys.includes(e.key))) {
-                    e.preventDefault();
-                    return false;
-                }
-            });
-            // 优化：禁止复制/剪切，补充防护
-            document.addEventListener('copy', (e) => e.preventDefault());
-            document.addEventListener('cut', (e) => e.preventDefault());
-        }
-
-        // ====================== 初始化：按优先级加载，提升速度 ======================
-        // 1. 先初始化核心功能（图片+防护），再初始化背景（避免阻塞）
-        window.addEventListener('DOMContentLoaded', () => {
-            initImgFunctions();
-            initProtection();
-            // 优化：延迟初始化背景，优先加载图片
-            setTimeout(initRainCanvas, 500);
-        });
-
-        // 2. 页面卸载时清理动画，避免内存泄漏
-        window.addEventListener('beforeunload', () => {
-            cancelAnimationFrame(rafId);
-        });
-    </script>
 </body>
 </html>
