@@ -96,63 +96,63 @@
                     width: 100%;
                     height: 100%;
                     background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+5bm/5pyN5Lq6PC90aXRsZT48dGV4dCB4PSIzMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYvMzAwIj7nlLXorr7orr7mlL/nlYw8L3RleHQ+PC9zdmc+") repeat;
-                    background-size: 120px;
-                    opacity: 0.12;
-                    pointer-events: none;
-                    z-index: 1;
+                background-size: 120px;
+                opacity: 0.12;
+                pointer-events: none;
+                z-index: 1;
+            }
+            /* 悬停效果 */
+            &:hover {
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 16px 48px rgba(0, 191, 255, 0.2);
+            }
+            /* 图片容器 */
+            .gallery-img-wrapper {
+                width: 100%;
+                height: 220px;
+                overflow: hidden;
+                position: relative;
+                /* 加载动画 */
+                &.loading::before {
+                    content: "";
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 40px;
+                    height: 40px;
+                    margin: -20px 0 0 -20px;
+                    border: 3px solid rgba(79, 172, 254, 0.3);
+                    border-radius: 50%;
+                    border-top-color: #4facfe;
+                    animation: spin 1s linear infinite;
+                    z-index: 2;
                 }
-                /* 悬停效果 */
-                &:hover {
-                    transform: translateY(-8px) scale(1.02);
-                    box-shadow: 0 16px 48px rgba(0, 191, 255, 0.2);
-                }
-                /* 图片容器 */
-                .gallery-img-wrapper {
+                /* 图片样式 - 降低清晰度防截图 */
+                img {
                     width: 100%;
-                    height: 220px;
-                    overflow: hidden;
-                    position: relative;
-                    /* 加载动画 */
-                    &.loading::before {
-                        content: "";
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        width: 40px;
-                        height: 40px;
-                        margin: -20px 0 0 -20px;
-                        border: 3px solid rgba(79, 172, 254, 0.3);
-                        border-radius: 50%;
-                        border-top-color: #4facfe;
-                        animation: spin 1s linear infinite;
-                        z-index: 2;
-                    }
-                    /* 图片样式 */
-                    img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        transform-origin: center;
-                        transition: transform 0.3s ease;
-                        /* 防盗模糊（加载完成后清除） */
-                        filter: blur(2px);
-                        &.loaded {
-                            filter: none;
-                        }
+                    height: 100%;
+                    object-fit: cover;
+                    transform-origin: center;
+                    transition: transform 0.3s ease;
+                    /* 核心：降低清晰度（保留轻微模糊，防截图） */
+                    filter: blur(2px) contrast(0.95) brightness(0.95);
+                    &.loaded {
+                        /* 加载完成后仅保留轻微模糊，不影响视觉但防截图 */
+                        filter: blur(0.8px) contrast(0.95) brightness(0.95);
                     }
                 }
-                /* 作品标题 */
-                .item-title {
-                    padding: 1rem;
-                    font-size: 1rem;
-                    font-weight: 500;
-                    color: #e2e8f0;
-                    background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.8));
-                }
+            }
+            /* 作品标题 */
+            .item-title {
+                padding: 1rem;
+                font-size: 1rem;
+                font-weight: 500;
+                color: #e2e8f0;
+                background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.8));
             }
         }
 
-        /* 全屏预览模式（保留拖拽缩放） */
+        /* 全屏预览模式（保留拖拽缩放，同时降低清晰度） */
         .preview-modal {
             position: fixed;
             top: 0;
@@ -174,7 +174,7 @@
                 overflow: hidden;
                 position: relative;
                 margin-bottom: 1rem;
-                /* 预览图片 */
+                /* 预览图片 - 降低清晰度防截图 */
                 img {
                     width: 100%;
                     height: 100%;
@@ -182,6 +182,8 @@
                     cursor: grab;
                     transform-origin: center;
                     transition: transform 0.05s linear;
+                    /* 核心：预览图也降低清晰度 */
+                    filter: blur(0.8px) contrast(0.95) brightness(0.95);
                     &:active {
                         cursor: grabbing;
                     }
@@ -760,7 +762,7 @@
                             ctx.font = '1px Arial';
                             ctx.fillText('PROTECTED BY AUTHOR ' + Date.now(), 0, 1);
                             
-                            // 替换图片为canvas（保留原属性）
+                            // 替换图片为canvas（保留原属性+降低清晰度）
                             const parent = this.parentElement;
                             const canvasCopy = canvas.cloneNode(true);
                             canvasCopy.className = this.className;
@@ -768,6 +770,7 @@
                             canvasCopy.style.width = '100%';
                             canvasCopy.style.height = '100%';
                             canvasCopy.style.objectFit = 'cover';
+                            canvasCopy.style.filter = 'blur(0.8px) contrast(0.95) brightness(0.95)';
                             canvasCopy.oncontextmenu = () => false;
                             
                             // 替换DOM（保留事件）
