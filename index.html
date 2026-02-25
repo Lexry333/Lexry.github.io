@@ -334,8 +334,8 @@
                     img {
                         transition: transform 0.03s linear !important; /* 更快的过渡，减少卡顿 */
                         touch-action: none; /* 禁用浏览器默认触摸行为，解决冲突 */
-                        max-width: 100%;
-                        max-height: 100%;
+                        max-width: none !important;
+                        max-height: none !important;
                         width: auto !important;
                         height: auto !important;
                         position: absolute;
@@ -432,6 +432,9 @@
         const imgStates = {}; // 保存每张图片的缩放/位移状态
         // 检测是否为移动端（仅用于移动端优化）
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // 新增：移动端点击防抖变量
+        let touchClickTimer = null;
+        let isScrolling = false;
         
         // 初始化图片状态（性能优化：提前初始化）
         imgList.forEach((_, index) => {
@@ -579,18 +582,40 @@
                 galleryItem.appendChild(title);
                 fragment.appendChild(galleryItem);
                 
-                // 绑定点击事件（移动端修复点不开问题）
+                // 绑定点击事件（移动端修复点不开问题 + 防误触）
                 galleryItem.addEventListener('click', () => {
+                    // 移动端防误触：滚动时不触发点击
+                    if (isMobile && isScrolling) return;
                     currentIndex = index;
                     openPreview();
                 });
-                // 移动端额外绑定touch事件，解决点击穿透/无响应
+                // 移动端额外绑定touch事件，解决点击穿透/无响应 + 防误触
                 if (isMobile) {
                     galleryItem.addEventListener('touchstart', (e) => {
                         e.preventDefault();
-                        currentIndex = index;
-                        openPreview();
+                        // 重置滚动状态
+                        isScrolling = false;
+                        // 防抖：长按/滑动时不触发点击
+                        touchClickTimer = setTimeout(() => {
+                            currentIndex = index;
+                            openPreview();
+                        }, 200); // 200ms防抖，滑动时会被清除
                     }, { passive: false });
+                    
+                    // 触摸移动时清除定时器，防止误触
+                    galleryItem.addEventListener('touchmove', (e) => {
+                        clearTimeout(touchClickTimer);
+                        isScrolling = true;
+                    }, { passive: true });
+                    
+                    // 触摸结束时清除定时器
+                    galleryItem.addEventListener('touchend', () => {
+                        clearTimeout(touchClickTimer);
+                        // 延迟重置滚动状态，避免快速点击被判定为滚动
+                        setTimeout(() => {
+                            isScrolling = false;
+                        }, 100);
+                    }, { passive: true });
                 }
                 
                 // 提前绑定画廊图片的拖拽缩放（保留功能，移动端简化）
@@ -655,12 +680,12 @@
             const container = previewImgContainer;
             const img = previewImg;
             
-            // 重置基础样式
+            // 重置基础样式（关键：移除最大宽高限制）
             img.style.position = 'absolute';
             img.style.top = '50%';
             img.style.left = '50%';
-            img.style.maxWidth = '100%';
-            img.style.maxHeight = '100%';
+            img.style.maxWidth = 'none';
+            img.style.maxHeight = 'none';
             img.style.width = 'auto';
             img.style.height = 'auto';
             
@@ -682,16 +707,20 @@
             const imgWidth = img.naturalWidth;
             const imgHeight = img.naturalHeight;
             
-            // 计算缩放比例
+            // 计算初始缩放比例（仅初始化时使用，后续可自由缩放拖动）
             const scaleX = containerWidth / imgWidth;
             const scaleY = containerHeight / imgHeight;
-            const scale = Math.min(scaleX, scaleY, 1); // 不放大，只缩小
+            const initScale = Math.min(scaleX, scaleY, 1); // 不放大，只缩小
             
-            // 应用缩放和居中
-            img.style.transform = `translate(-50%, -50%) scale(${scale})`;
-            imgStates[currentIndex].scale = scale;
-            imgStates[currentIndex].x = 0;
-            imgStates[currentIndex].y = 0;
+            // 只有首次加载时设置初始缩放，后续保留用户调整的状态
+            if (imgStates[currentIndex].scale === 1) {
+                imgStates[currentIndex].scale = initScale;
+                imgStates[currentIndex].x = 0;
+                imgStates[currentIndex].y = 0;
+            }
+            
+            // 应用变换
+            updateImgTransform(img, imgStates[currentIndex]);
         }
 
         // 关闭预览
@@ -756,25 +785,20 @@
             img.removeEventListener('mousedown', handleMouseDown);
             img.removeEventListener('touchstart', handleTouchStart);
             
-            // 滚轮缩放（移动端禁用，避免冲突）
+            // 滚轮缩放（PC端优化：移除节流，提升响应速度）
             function handleWheel(e) {
                 if (isMobile) return; // 移动端直接返回，禁用滚轮缩放
                 e.preventDefault();
                 
-                // 节流：避免高频触发
-                let wheelTimer = null;
-                if (wheelTimer) clearTimeout(wheelTimer);
-                wheelTimer = setTimeout(() => {
-                    const index = isPreview ? currentIndex : galleryIndex;
-                    const state = imgStates[index];
-                    
-                    // 缩放逻辑（保留原范围）
-                    const scaleDelta = e.deltaY < 0 ? 0.2 : -0.2;
-                    state.scale = Math.max(0.5, Math.min(6, state.scale + scaleDelta));
-                    
-                    // 更新变换
-                    updateImgTransform(img, state);
-                }, 16); // 60fps
+                const index = isPreview ? currentIndex : galleryIndex;
+                const state = imgStates[index];
+                
+                // 优化缩放步长和响应速度，移除节流定时器
+                const scaleDelta = e.deltaY < 0 ? 0.1 : -0.1; // 减小步长，更细腻
+                state.scale = Math.max(0.5, Math.min(6, state.scale + scaleDelta));
+                
+                // 立即更新变换，无延迟
+                updateImgTransform(img, state);
             }
             if (!isMobile) { // 仅桌面端绑定滚轮事件
                 img.addEventListener('wheel', handleWheel, { passive: false });
@@ -817,7 +841,7 @@
                 img.addEventListener('mousedown', handleMouseDown);
             }
             
-            // 移动端触摸（大幅优化，解决卡顿/冲突）
+            // 移动端触摸（大幅优化，解决卡顿/冲突 + 修复拖动问题）
             function handleTouchStart(e) {
                 if (!isMobile) return; // 仅移动端处理触摸事件
                 e.preventDefault();
@@ -831,14 +855,19 @@
                 let lastY = state.y;
                 let touchTimer = null;
                 
-                // 单指拖拽（移动端简化逻辑，减少计算）
+                // 记录初始触摸位置
+                touchStart.startX = touches[0].clientX;
+                touchStart.startY = touches[0].clientY;
+                touchStart.startTime = Date.now();
+                
+                // 单指拖拽（移动端修复拖动逻辑）
                 if (touches.length === 1) {
                     touchStart.x = touches[0].clientX - state.x;
                     touchStart.y = touches[0].clientY - state.y;
-                    // 防抖：避免快速触摸导致的卡顿
+                    // 防抖：避免快速触摸导致的卡顿（缩短到30ms）
                     touchTimer = setTimeout(() => {
                         touchStart.isDragging = true;
-                    }, 50);
+                    }, 30);
                 }
                 // 双指缩放（移动端简化计算）
                 else if (touches.length === 2) {
@@ -847,30 +876,26 @@
                     clearTimeout(touchTimer); // 取消拖拽判定
                 }
                 
-                // 触摸移动（移动端简化，减少高频计算）
+                // 触摸移动（移动端修复，支持自由拖动）
                 function handleTouchMove(e) {
                     if (!isMobile) return;
                     e.preventDefault();
                     const touches = e.touches;
                     
-                    // 节流：移动端每20ms更新一次，减少卡顿
-                    if (touchTimer) return;
-                    touchTimer = setTimeout(() => {
-                        if (touches.length === 1 && touchStart.isDragging) {
-                            // 单指拖拽：简化计算，直接更新
-                            state.x = touches[0].clientX - touchStart.x;
-                            state.y = touches[0].clientY - touchStart.y;
-                            updateImgTransform(img, state);
-                        }
-                        else if (touches.length === 2) {
-                            // 双指缩放：简化距离计算，限制缩放范围
-                            const distance = getTouchDistance(touches[0], touches[1]);
-                            const newScale = Math.max(0.5, Math.min(4, touchStart.scale * (distance / touchStart.distance)));
-                            state.scale = newScale;
-                            updateImgTransform(img, state);
-                        }
-                        touchTimer = null;
-                    }, 20);
+                    // 移除节流，让拖动更流畅
+                    if (touches.length === 1 && touchStart.isDragging) {
+                        // 单指拖拽：直接更新位置，无限制
+                        state.x = touches[0].clientX - touchStart.x;
+                        state.y = touches[0].clientY - touchStart.y;
+                        updateImgTransform(img, state);
+                    }
+                    else if (touches.length === 2) {
+                        // 双指缩放：简化距离计算，限制缩放范围
+                        const distance = getTouchDistance(touches[0], touches[1]);
+                        const newScale = Math.max(0.5, Math.min(8, touchStart.scale * (distance / touchStart.distance)));
+                        state.scale = newScale;
+                        updateImgTransform(img, state);
+                    }
                 }
                 
                 // 触摸结束（清理定时器，避免内存泄漏）
@@ -906,12 +931,12 @@
             }
         }
 
-        // 更新图片变换（移动端修复尺寸）
+        // 更新图片变换（移动端修复尺寸 + 支持自由拖动）
         function updateImgTransform(img, state) {
             if (!img || !state) return;
-            // 移动端使用3D变换，开启硬件加速，修复尺寸
+            // 移动端使用3D变换，开启硬件加速，支持自由拖动
             if (isMobile) {
-                // 结合居中+缩放+位移
+                // 结合居中+缩放+位移（移除位置限制）
                 const translateX = state.x || 0;
                 const translateY = state.y || 0;
                 img.style.transform = `translate3d(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px), 0) scale(${state.scale})`;
