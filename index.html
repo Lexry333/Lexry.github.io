@@ -24,17 +24,18 @@
             overflow-x: hidden;
             color: #fff;
             position: relative;
-            /* 粒子背景画布 */
-            canvas {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 0;
-                pointer-events: none;
-                opacity: 0.7;
-            }
+        }
+        
+        /* 粒子背景画布 */
+        body canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.7;
         }
 
         /* 顶部标题栏 - 简约高端 */
@@ -44,27 +45,30 @@
             text-align: center;
             padding: 2rem 1rem;
             margin-bottom: 1rem;
-            h1 {
-                font-size: 2.2rem;
-                font-weight: 700;
-                background: linear-gradient(120deg, #4facfe, #00f2fe);
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                margin-bottom: 0.5rem;
-            }
-            .subtitle {
-                color: #a0aec0;
-                font-size: 0.95rem;
-                letter-spacing: 0.5px;
-                line-height: 1.5;
-            }
-            .subtitle-en {
-                color: #718096;
-                font-size: 0.85rem;
-                letter-spacing: 0.3px;
-                margin-top: 0.2rem;
-            }
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(120deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .subtitle {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            line-height: 1.5;
+        }
+        
+        .header .subtitle-en {
+            color: #718096;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+            margin-top: 0.2rem;
         }
 
         /* 核心：沉浸式网格画廊（替代滚轮列表） */
@@ -78,78 +82,86 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
-            /* 网格项悬停动画 */
-            .gallery-item {
-                border-radius: 12px;
-                overflow: hidden;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-                transform: translateY(0);
-                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-                cursor: pointer;
-                position: relative;
-                /* 防盗水印层 */
-                &::after {
-                    content: "";
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+5bm/5pyN5Lq6PC90aXRsZT48dGV4dCB4PSIzMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYvMzAwIj7nlLXorr7orr7mlL/nlYw8L3RleHQ+PC9zdmc+") repeat;
-                    background-size: 120px;
-                    opacity: 0.12;
-                    pointer-events: none;
-                    z-index: 1;
-                }
-                /* 悬停效果 */
-                &:hover {
-                    transform: translateY(-8px) scale(1.02);
-                    box-shadow: 0 16px 48px rgba(0, 191, 255, 0.2);
-                }
-                /* 图片容器 */
-                .gallery-img-wrapper {
-                    width: 100%;
-                    height: 220px;
-                    overflow: hidden;
-                    position: relative;
-                    /* 加载动画 */
-                    &.loading::before {
-                        content: "";
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        width: 40px;
-                        height: 40px;
-                        margin: -20px 0 0 -20px;
-                        border: 3px solid rgba(79, 172, 254, 0.3);
-                        border-radius: 50%;
-                        border-top-color: #4facfe;
-                        animation: spin 1s linear infinite;
-                        z-index: 2;
-                    }
-                    /* 图片样式 */
-                    img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        transform-origin: center;
-                        transition: transform 0.3s ease;
-                        /* 防盗模糊（加载完成后清除） */
-                        filter: blur(2px);
-                        &.loaded {
-                            filter: none;
-                        }
-                    }
-                }
-                /* 作品标题 */
-                .item-title {
-                    padding: 1rem;
-                    font-size: 1rem;
-                    font-weight: 500;
-                    color: #e2e8f0;
-                    background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.8));
-                }
-            }
+        }
+        
+        /* 网格项悬停动画 */
+        .gallery-container .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transform: translateY(0);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        /* 防盗水印层 */
+        .gallery-container .gallery-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+5bm/5pyN5Lq6PC90aXRsZT48dGV4dCB4PSIzMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYvMzAwIj7nlLXorr7orr7mlL/nlYw8L3RleHQ+PC9zdmc+") repeat;
+            background-size: 120px;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* 悬停效果 */
+        .gallery-container .gallery-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 48px rgba(0, 191, 255, 0.2);
+        }
+        
+        /* 图片容器 */
+        .gallery-container .gallery-item .gallery-img-wrapper {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 加载动画 */
+        .gallery-container .gallery-item .gallery-img-wrapper.loading::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            margin: -20px 0 0 -20px;
+            border: 3px solid rgba(79, 172, 254, 0.3);
+            border-radius: 50%;
+            border-top-color: #4facfe;
+            animation: spin 1s linear infinite;
+            z-index: 2;
+        }
+        
+        /* 图片样式 */
+        .gallery-container .gallery-item .gallery-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            /* 防盗模糊（加载完成后清除） */
+            filter: blur(2px);
+        }
+        
+        .gallery-container .gallery-item .gallery-img-wrapper img.loaded {
+            filter: none;
+        }
+        
+        /* 作品标题 */
+        .gallery-container .gallery-item .item-title {
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            background: linear-gradient(to bottom, transparent, rgba(17, 24, 39, 0.8));
         }
 
         /* 全屏预览模式（保留拖拽缩放） */
@@ -166,105 +178,118 @@
             align-items: center;
             justify-content: center;
             padding: 2rem 1rem;
-            /* 预览图片容器 */
-            .preview-img-container {
-                width: 90%;
-                max-width: 1200px;
-                height: 80vh;
-                overflow: hidden;
-                position: relative;
-                margin-bottom: 1rem;
-                /* 预览图片 */
-                img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: contain;
-                    cursor: grab;
-                    transform-origin: center;
-                    transition: transform 0.05s linear;
-                    &:active {
-                        cursor: grabbing;
-                    }
-                }
-            }
-            /* 导航控制栏 */
-            .preview-controls {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                width: 90%;
-                max-width: 1200px;
-                margin-top: 1rem;
-                /* 翻页按钮 */
-                .nav-btn {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
-                    background: rgba(79, 172, 254, 0.2);
-                    color: #fff;
-                    border: 1px solid rgba(79, 172, 254, 0.4);
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    &:hover {
-                        background: rgba(79, 172, 254, 0.4);
-                        transform: scale(1.05);
-                    }
-                    &:disabled {
-                        opacity: 0.2;
-                        cursor: not-allowed;
-                        transform: none;
-                    }
-                }
-                /* 页码指示器 */
-                .page-indicator {
-                    color: #a0aec0;
-                    font-size: 0.9rem;
-                    span {
-                        color: #4facfe;
-                        font-weight: 600;
-                    }
-                }
-                /* 关闭按钮 */
-                .close-btn {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 50%;
-                    background: rgba(248, 113, 113, 0.2);
-                    color: #fff;
-                    border: 1px solid rgba(248, 113, 113, 0.4);
-                    font-size: 1.2rem;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    &:hover {
-                        background: rgba(248, 113, 113, 0.4);
-                        transform: scale(1.05);
-                    }
-                }
-            }
-            /* 预览提示语 */
-            .preview-tip {
-                position: absolute;
-                top: 2rem;
-                color: #a0aec0;
-                font-size: 0.9rem;
-                background: rgba(17, 24, 39, 0.7);
-                padding: 0.5rem 1rem;
-                border-radius: 20px;
-                pointer-events: none;
-                line-height: 1.5;
-            }
-            .preview-tip-en {
-                font-size: 0.8rem;
-                color: #90a0b7;
-                margin-top: 0.2rem;
-            }
+        }
+        
+        /* 预览图片容器 */
+        .preview-modal .preview-img-container {
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        
+        /* 预览图片 */
+        .preview-modal .preview-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            cursor: grab;
+            transform-origin: center;
+            transition: transform 0.05s linear;
+        }
+        
+        .preview-modal .preview-img-container img:active {
+            cursor: grabbing;
+        }
+        
+        /* 导航控制栏 */
+        .preview-modal .preview-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 1rem;
+        }
+        
+        /* 翻页按钮 */
+        .preview-modal .preview-controls .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(79, 172, 254, 0.2);
+            color: #fff;
+            border: 1px solid rgba(79, 172, 254, 0.4);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-modal .preview-controls .nav-btn:hover {
+            background: rgba(79, 172, 254, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .preview-modal .preview-controls .nav-btn:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 页码指示器 */
+        .preview-modal .preview-controls .page-indicator {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        .preview-modal .preview-controls .page-indicator span {
+            color: #4facfe;
+            font-weight: 600;
+        }
+        
+        /* 关闭按钮 */
+        .preview-modal .preview-controls .close-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(248, 113, 113, 0.2);
+            color: #fff;
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .preview-modal .preview-controls .close-btn:hover {
+            background: rgba(248, 113, 113, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* 预览提示语 */
+        .preview-modal .preview-tip {
+            position: absolute;
+            top: 2rem;
+            color: #a0aec0;
+            font-size: 0.9rem;
+            background: rgba(17, 24, 39, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            pointer-events: none;
+            line-height: 1.5;
+        }
+        
+        .preview-modal .preview-tip-en {
+            font-size: 0.8rem;
+            color: #90a0b7;
+            margin-top: 0.2rem;
         }
 
         /* 动画定义 */
@@ -280,24 +305,19 @@
             .gallery-container {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                 gap: 1rem;
-                .gallery-item {
-                    .gallery-img-wrapper {
-                        height: 180px;
-                    }
-                }
             }
-            .preview-modal {
-                .preview-img-container {
-                    width: 95%;
-                    height: 70vh;
-                }
-                .preview-controls {
-                    .nav-btn, .close-btn {
-                        width: 40px;
-                        height: 40px;
-                        font-size: 1rem;
-                    }
-                }
+            .gallery-container .gallery-item .gallery-img-wrapper {
+                height: 180px;
+            }
+            .preview-modal .preview-img-container {
+                width: 95%;
+                height: 70vh;
+            }
+            .preview-modal .preview-controls .nav-btn, 
+            .preview-modal .preview-controls .close-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
             }
         }
 
