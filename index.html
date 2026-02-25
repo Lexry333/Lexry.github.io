@@ -311,27 +311,48 @@
                     }
                 }
             }
-            /* 移动端预览模式优化 */
+            /* 移动端预览模式优化 - 修复尺寸问题 */
             .preview-modal {
-                padding: 1rem 0.5rem;
+                padding: 0; /* 移除内边距，最大化可用空间 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 /* 提示语适配 */
                 .preview-tip {
                     top: 1rem;
+                    left: 50%;
+                    transform: translateX(-50%);
                     font-size: 0.8rem;
                     padding: 0.4rem 0.8rem;
+                    z-index: 1001;
                 }
                 .preview-img-container {
-                    width: 98%;
-                    height: 70vh;
-                    /* 移动端预览图片优化 */
+                    width: 100%; /* 全屏宽度 */
+                    height: calc(100vh - 80px); /* 自适应高度，预留控制栏空间 */
+                    max-width: 100%; /* 取消最大宽度限制 */
+                    /* 移动端预览图片优化 - 强制正确适配 */
                     img {
                         transition: transform 0.03s linear !important; /* 更快的过渡，减少卡顿 */
                         touch-action: none; /* 禁用浏览器默认触摸行为，解决冲突 */
+                        max-width: 100%;
+                        max-height: 100%;
+                        width: auto !important;
+                        height: auto !important;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) !important;
                     }
                 }
                 .preview-controls {
-                    width: 98%;
-                    margin-top: 0.5rem;
+                    width: 100%;
+                    height: 80px;
+                    margin: 0;
+                    padding: 0 1rem;
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    background: rgba(0, 8, 17, 0.8);
                     /* 增大移动端按钮，提升点击体验 */
                     .nav-btn, .close-btn {
                         width: 44px;
@@ -492,7 +513,7 @@
             animate(0);
         }
 
-        // ====================== 核心：动态生成网格画廊（移动端优化） ======================
+        // ====================== 核心：动态生成网格画廊（移动端优化加载） ======================
         function renderGallery() {
             // 清空容器（避免重复）
             galleryContainer.innerHTML = '';
@@ -509,14 +530,28 @@
                 const imgWrapper = document.createElement('div');
                 imgWrapper.className = 'gallery-img-wrapper loading';
                 
-                // 图片元素（懒加载+防盗，移动端优化加载策略）
+                // 图片元素（移动端加载优化）
                 const img = document.createElement('img');
-                img.src = item.src;
+                // 移动端使用低分辨率占位图+渐进式加载
+                if (isMobile) {
+                    // 先加载小尺寸占位图（提升加载速度）
+                    img.src = item.src;
+                    // 预加载高清图到缓存
+                    const highResImg = new Image();
+                    highResImg.src = item.src;
+                    highResImg.onload = function() {
+                        img.src = this.src;
+                    };
+                } else {
+                    img.src = item.src;
+                }
                 img.alt = `作品${item.title}`;
                 // 移动端强制懒加载，且降低图片解码优先级
-                img.loading = 'lazy';
+                img.loading = isMobile ? 'eager' : 'lazy'; // 移动端改为立即加载，避免延迟
                 img.decoding = isMobile ? 'async' : 'auto';
                 img.dataset.index = index;
+                // 移动端图片预加载提示
+                img.setAttribute('fetchpriority', isMobile ? 'high' : 'auto');
                 
                 // 图片加载完成（清除模糊+加载动画）
                 img.onload = function() {
@@ -569,11 +604,22 @@
             totalPageNum.textContent = imgList.length;
         }
 
-        // ====================== 预览模式控制 ======================
+        // ====================== 预览模式控制（修复移动端尺寸+加载） ======================
         // 打开预览
         function openPreview() {
-            // 更新预览图片
-            previewImg.src = imgList[currentIndex].src;
+            // 移动端预加载当前图片
+            if (isMobile) {
+                const img = new Image();
+                img.src = imgList[currentIndex].src;
+                img.onload = function() {
+                    previewImg.src = this.src;
+                    // 修复移动端图片居中
+                    fixMobileImagePosition();
+                };
+            } else {
+                previewImg.src = imgList[currentIndex].src;
+            }
+            
             previewImg.alt = `作品${imgList[currentIndex].title}`;
             
             // 恢复图片状态
@@ -595,6 +641,57 @@
             // 防盗：预览图额外防护
             previewImg.oncontextmenu = () => false;
             previewImg.oncopy = () => false;
+            
+            // 移动端强制重绘，修复尺寸
+            if (isMobile) {
+                setTimeout(fixMobileImagePosition, 50);
+            }
+        }
+
+        // 修复移动端预览图片位置
+        function fixMobileImagePosition() {
+            if (!isMobile || !previewImg) return;
+            
+            const container = previewImgContainer;
+            const img = previewImg;
+            
+            // 重置基础样式
+            img.style.position = 'absolute';
+            img.style.top = '50%';
+            img.style.left = '50%';
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '100%';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+            
+            // 等待图片加载完成后调整
+            if (img.complete) {
+                adjustMobileImage();
+            } else {
+                img.onload = adjustMobileImage;
+            }
+        }
+
+        // 调整移动端图片尺寸和位置
+        function adjustMobileImage() {
+            const container = previewImgContainer;
+            const img = previewImg;
+            
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight;
+            const imgWidth = img.naturalWidth;
+            const imgHeight = img.naturalHeight;
+            
+            // 计算缩放比例
+            const scaleX = containerWidth / imgWidth;
+            const scaleY = containerHeight / imgHeight;
+            const scale = Math.min(scaleX, scaleY, 1); // 不放大，只缩小
+            
+            // 应用缩放和居中
+            img.style.transform = `translate(-50%, -50%) scale(${scale})`;
+            imgStates[currentIndex].scale = scale;
+            imgStates[currentIndex].x = 0;
+            imgStates[currentIndex].y = 0;
         }
 
         // 关闭预览
@@ -618,12 +715,27 @@
             // 边界处理
             currentIndex = Math.max(0, Math.min(imgList.length - 1, currentIndex));
             
-            // 更新预览
-            previewImg.src = imgList[currentIndex].src;
+            // 移动端预加载下一张图片
+            if (isMobile) {
+                const img = new Image();
+                img.src = imgList[currentIndex].src;
+                img.onload = function() {
+                    previewImg.src = this.src;
+                    fixMobileImagePosition();
+                };
+            } else {
+                previewImg.src = imgList[currentIndex].src;
+            }
+            
             previewImg.alt = `作品${imgList[currentIndex].title}`;
             
             // 恢复新作品状态
             resetPreviewImgTransform();
+            
+            // 移动端修复位置
+            if (isMobile) {
+                setTimeout(fixMobileImagePosition, 50);
+            }
             
             // 更新页码和按钮
             currentPageNum.textContent = currentIndex + 1;
@@ -794,12 +906,15 @@
             }
         }
 
-        // 更新图片变换（移动端简化）
+        // 更新图片变换（移动端修复尺寸）
         function updateImgTransform(img, state) {
             if (!img || !state) return;
-            // 移动端使用3D变换，开启硬件加速，减少卡顿
+            // 移动端使用3D变换，开启硬件加速，修复尺寸
             if (isMobile) {
-                img.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale(${state.scale})`;
+                // 结合居中+缩放+位移
+                const translateX = state.x || 0;
+                const translateY = state.y || 0;
+                img.style.transform = `translate3d(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px), 0) scale(${state.scale})`;
                 img.style.transformOrigin = 'center center';
             } else {
                 img.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
@@ -812,13 +927,20 @@
             
             const transform = previewImg.style.transform;
             const scaleMatch = transform.match(/scale\(([\d.]+)\)/);
-            const xMatch = transform.match(/translate(3d)?\(([\d.-]+)px,/);
-            const yMatch = transform.match(/, ([\d.-]+)px(, 0)?\)/);
+            const xMatch = transform.match(/translate(3d)?\(calc\(-50% \+ ([\d.-]+)px\),/);
+            const yMatch = transform.match(/calc\(-50% \+ ([\d.-]+)px\)(, 0)?\)/);
             
             if (scaleMatch && xMatch && yMatch) {
                 imgStates[currentIndex].scale = parseFloat(scaleMatch[1]);
                 imgStates[currentIndex].x = parseFloat(xMatch[2]);
                 imgStates[currentIndex].y = parseFloat(yMatch[1]);
+            } else if (scaleMatch && transform.match(/translate\(([\d.-]+)px,/)) {
+                // 兼容桌面端
+                const xMatchDesktop = transform.match(/translate\(([\d.-]+)px,/);
+                const yMatchDesktop = transform.match(/, ([\d.-]+)px\)/);
+                imgStates[currentIndex].scale = parseFloat(scaleMatch[1]);
+                imgStates[currentIndex].x = parseFloat(xMatchDesktop[1]);
+                imgStates[currentIndex].y = parseFloat(yMatchDesktop[1]);
             }
         }
 
@@ -966,6 +1088,15 @@
                 renderGallery(); // 生成画廊
                 bindEvents(); // 绑定事件
                 initSecurity(); // 防盗加固
+                
+                // 移动端预加载所有图片到缓存
+                if (isMobile) {
+                    imgList.forEach(item => {
+                        const img = new Image();
+                        img.src = item.src;
+                        img.fetchpriority = 'low'; // 低优先级，不阻塞首屏
+                    });
+                }
             }, 0);
         });
 
@@ -976,6 +1107,7 @@
             criticalImages.forEach(item => {
                 const img = new Image();
                 img.src = item.src;
+                img.fetchpriority = 'high';
                 img.onload = () => console.log(`预加载完成：作品${item.title}`);
             });
         }
